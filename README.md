@@ -1,2 +1,2 @@
 # hello-kitty
-Auto cat feeding system
+Auto cat feeding system, mobile app part
