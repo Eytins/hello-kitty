@@ -35,7 +35,7 @@ app.register_blueprint(swaggerui_blueprint)
 app.secret_key = 'your secret key'
 
 
-app.config['MYSQL_HOST'] = 'hello-kitty.cniyohxj2esi.eu-west-2.rds.amazonaws.com'
+app.config['MYSQL_HOST'] = 'hello-kitty.cfin5rxctmhf.eu-west-1.rds.amazonaws.com'
 app.config['MYSQL_USER'] = 'admin'
 app.config['MYSQL_PASSWORD'] = 'clover06'
 app.config['MYSQL_DB'] = 'kitty'
@@ -123,4 +123,4 @@ def delete_a_cat(id):
 
 
 if __name__ == "__main__":
-	app.run(host ="localhost", port = int("5000"))
+	app.run(host ="0.0.0.0", port = int("8000"))
