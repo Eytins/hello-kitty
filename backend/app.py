@@ -122,5 +122,38 @@ def delete_a_cat(id):
     return msg
 
 
+@app.route('/addWeight', methods =['POST'])
+def add_weight():
+    msg = ''
+    if request.method == 'POST' and 'id' in request.form and 'weight' in request.form and 'date' in request.form:
+        id = request.form['id']
+        weight = request.form['weight']
+        date = request.form['date']
+        if (len(id) > 0) & (len(weight) > 0) & (len(date) > 0):
+            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
+            mysql.connection.commit()
+            msg = 'The details of the cat is added into database ！'
+        else:
+            msg = 'Id, weight, date could not be null !'
+    elif request.method == 'POST':
+        msg = 'Please fill out the form !'
+    return jsonify(msg)
+
+
+@app.route('/getWeight', methods =['GET'])
+def get_weight():
+    id = request.args.get("id")
+    if len(id) != 0:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM weight WHERE id = % s', (int(id), ))
+        results = cursor.fetchall()
+        if results:
+            return jsonify(results)
+        else:
+            return "No data for the cat."
+    else:
+        return "Pet's id could not be null."
+
 if __name__ == "__main__":
 	app.run(host ="0.0.0.0", port = int("8000"))
