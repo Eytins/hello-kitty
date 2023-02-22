@@ -35,9 +35,9 @@ app.register_blueprint(swaggerui_blueprint)
 app.secret_key = 'your secret key'
 
 
-app.config['MYSQL_HOST'] = 'hello-kitty.cfin5rxctmhf.eu-west-1.rds.amazonaws.com'
-app.config['MYSQL_USER'] = 'admin'
-app.config['MYSQL_PASSWORD'] = 'clover06'
+app.config['MYSQL_HOST'] = '34.246.195.200'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'p@ssword'
 app.config['MYSQL_DB'] = 'kitty'
 
 
@@ -146,7 +146,7 @@ def get_weight():
     id = request.args.get("id")
     if len(id) != 0:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM weight WHERE id = % s', (int(id), ))
+        cursor.execute('SELECT * FROM weight WHERE id = % s ORDER BY weight_date', (int(id), ))
         results = cursor.fetchall()
         if results:
             return jsonify(results)
