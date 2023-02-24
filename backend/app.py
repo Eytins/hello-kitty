@@ -14,7 +14,8 @@ API_URL = '/static/swagger.json'  # API url
 
 # Call factory function to create our blueprint
 swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    SWAGGER_URL,
     API_URL,
     config={  # Swagger UI config overrides
         'app_name': "Hello-Kitty"
@@ -35,7 +36,7 @@ app.register_blueprint(swaggerui_blueprint)
 app.secret_key = 'your secret key'
 
 
-app.config['MYSQL_HOST'] = '34.246.195.200'
+app.config['MYSQL_HOST'] = 'ec2-34-246-195-200.eu-west-1.compute.amazonaws.com'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'p@ssword'
 app.config['MYSQL_DB'] = 'kitty'
@@ -44,7 +45,7 @@ app.config['MYSQL_DB'] = 'kitty'
 mysql = MySQL(app)
 
 
-@app.route('/getDetails', methods =['GET'])
+@app.route('/getDetails', methods=['GET'])
 def get_details():
     id = request.args.get("id")
     if len(id) != 0:
@@ -59,7 +60,7 @@ def get_details():
         return "Pet's id could not be null."
 
 
-@app.route('/addACat', methods =['POST'])
+@app.route('/addACat', methods=['POST'])
 def add_a_cat():
     msg = ''
     if request.method == 'POST' and 'name' in request.form and 'age' in request.form and 'sex' in request.form:
@@ -71,7 +72,8 @@ def add_a_cat():
                 msg = 'name must contain only characters and numbers !'
             else:
                 cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute('INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
+                cursor.execute(
+                    'INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
                 mysql.connection.commit()
                 msg = 'The details of the cat is added into database ！'
         else:
@@ -81,7 +83,7 @@ def add_a_cat():
     return msg
 
 
-@app.route('/updateDetails/<int:id>', methods =['PUT'])
+@app.route('/updateDetails/<int:id>', methods=['PUT'])
 def update_details(id):
     msg = ''
     if request.method == 'PUT':
@@ -93,9 +95,10 @@ def update_details(id):
             age = request.form['age']
             sex = request.form['sex']
             try:
-                    cursor.execute('UPDATE pets SET NAME =% s, age =% s, sex =% s WHERE id =% s', (name, age, sex, (id, ), ))
-                    mysql.connection.commit()
-                    msg = 'The details of the cat is updated ！'
+                cursor.execute(
+                    'UPDATE pets SET NAME =% s, age =% s, sex =% s WHERE id =% s', (name, age, sex, (id, ), ))
+                mysql.connection.commit()
+                msg = 'The details of the cat is updated ！'
             except:
                 return 'There was a problem updating...'
         else:
@@ -103,7 +106,7 @@ def update_details(id):
     return msg
 
 
-@app.route('/deleteACat/<int:id>', methods =['DELETE'])
+@app.route('/deleteACat/<int:id>', methods=['DELETE'])
 def delete_a_cat(id):
     msg = ''
     if request.method == 'DELETE':
@@ -112,9 +115,9 @@ def delete_a_cat(id):
         results = cursor.fetchone()
         if results:
             try:
-                    cursor.execute('DELETE FROM pets WHERE id =% s', (id, ))
-                    mysql.connection.commit()
-                    msg = 'The details of the cat is deleted ！'
+                cursor.execute('DELETE FROM pets WHERE id =% s', (id, ))
+                mysql.connection.commit()
+                msg = 'The details of the cat is deleted ！'
             except:
                 return 'There was a problem deleting...'
         else:
@@ -122,7 +125,7 @@ def delete_a_cat(id):
     return msg
 
 
-@app.route('/addWeight', methods =['POST'])
+@app.route('/addWeight', methods=['POST'])
 def add_weight():
     msg = ''
     if request.method == 'POST' and 'id' in request.form and 'weight' in request.form and 'date' in request.form:
@@ -131,7 +134,8 @@ def add_weight():
         date = request.form['date']
         if (len(id) > 0) & (len(weight) > 0) & (len(date) > 0):
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
+            cursor.execute(
+                'REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
             mysql.connection.commit()
             msg = 'The details of the cat is added into database ！'
         else:
@@ -141,19 +145,24 @@ def add_weight():
     return jsonify(msg)
 
 
-@app.route('/getWeight', methods =['GET'])
+@app.route('/getWeight', methods=['GET'])
 def get_weight():
     id = request.args.get("id")
     if len(id) != 0:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM weight WHERE id = % s ORDER BY weight_date', (int(id), ))
+        cursor.execute(
+            'SELECT * FROM weight WHERE id = % s ORDER BY weight_date', (int(id), ))
         results = cursor.fetchall()
         if results:
+            # format date as "yyyy-MM-dd"
+            for row in results:
+                row['weight_date'] = row['weight_date'].strftime('%Y-%m-%d')
             return jsonify(results)
         else:
             return "No data for the cat."
     else:
         return "Pet's id could not be null."
 
+
 if __name__ == "__main__":
-	app.run(host ="0.0.0.0", port = int("8000"))
+    app.run(host="0.0.0.0", port=int("8000"))
