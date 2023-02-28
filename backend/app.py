@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
 from flask_swagger_ui import get_swaggerui_blueprint
+from datetime import date
 
 
 app = Flask(__name__)
@@ -125,24 +126,53 @@ def delete_a_cat(id):
     return msg
 
 
+# @app.route('/addWeight', methods=['POST'])
+# def add_weight():
+#     msg = ''
+#     if request.method == 'POST' and 'id' in request.form and 'weight' in request.form and 'date' in request.form:
+#         id = request.form['id']
+#         weight = request.form['weight']
+#         date = request.form['date']
+#         if (len(id) > 0) & (len(weight) > 0) & (len(date) > 0):
+#             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+#             cursor.execute(
+#                 'REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
+#             mysql.connection.commit()
+#             msg = 'The details of the cat is added into database ！'
+#         else:
+#             msg = 'Id, weight, date could not be null !'
+#     elif request.method == 'POST':
+#         msg = 'Please fill out the form !'
+#     return jsonify(msg)
+
+
 @app.route('/addWeight', methods=['POST'])
 def add_weight():
     msg = ''
-    if request.method == 'POST' and 'id' in request.form and 'weight' in request.form and 'date' in request.form:
-        id = request.form['id']
-        weight = request.form['weight']
-        date = request.form['date']
-        if (len(id) > 0) & (len(weight) > 0) & (len(date) > 0):
-            cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(
-                'REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
-            mysql.connection.commit()
-            msg = 'The details of the cat is added into database ！'
+    if request.method == 'POST':
+        req_data = request.get_json()
+        if req_data and "id" in req_data and "weight" in req_data:
+            id = req_data["id"]
+            weight = req_data["weight"]
+            today = date.today()
+            if id is not None and id > 0 and weight is not None and weight > 0:
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(
+                    'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
+                    (id, weight, today,)
+                )
+                mysql.connection.commit()
+                msg = 'The weight of the cat is added into database!'
+            else:
+                msg = 'Invalid request data! Please provide valid id, weight and date.'
+            feedingDuration = 0
         else:
-            msg = 'Id, weight, date could not be null !'
-    elif request.method == 'POST':
-        msg = 'Please fill out the form !'
-    return jsonify(msg)
+            msg = 'Invalid request data! Please provide id, weight and date.'
+            feedingDuration = 0
+    return jsonify({
+        'feedingDuration': feedingDuration,
+        'message': msg
+    })
 
 
 @app.route('/getWeight', methods=['GET'])
@@ -157,11 +187,24 @@ def get_weight():
             # format date as "yyyy-MM-dd"
             for row in results:
                 row['weight_date'] = row['weight_date'].strftime('%Y-%m-%d')
-            return jsonify(results)
+            # return results as JSON response
+            return jsonify({
+                "error": False,
+                "message": "Success",
+                "data": results
+            })
         else:
-            return "No data for the cat."
+            return jsonify({
+                "error": True,
+                "message": "No data for the cat.",
+                "data": []
+            })
     else:
-        return "Pet's id could not be null."
+        return jsonify({
+            "error": True,
+            "message": "Pet's id could not be null.",
+            "data": []
+        })
 
 
 if __name__ == "__main__":
