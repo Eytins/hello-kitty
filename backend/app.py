@@ -64,24 +64,29 @@ def get_details():
 @app.route('/addACat', methods=['POST'])
 def add_a_cat():
     msg = ''
-    if request.method == 'POST' and 'name' in request.form and 'age' in request.form and 'sex' in request.form:
-        name = request.form['name']
-        age = request.form['age']
-        sex = request.form['sex']
-        if (len(name) > 0) & (len(age) > 0) & (len(sex) > 0):
-            if not re.match(r'[A-Za-z0-9]+', name):
-                msg = 'name must contain only characters and numbers !'
-            else:
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(
-                    'INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
-                mysql.connection.commit()
-                msg = 'The details of the cat is added into database ！'
+    if request.method == 'POST':
+        req_data = request.get_json()
+        if req_data and "name" in req_data and "age" in req_data and "sex" in req_data:
+            name = req_data["name"]
+            age = req_data["age"]
+            sex = req_data["sex"]
+            if (len(name) > 0) & (len(age) > 0) & (len(sex) > 0):
+                if not re.match(r'[A-Za-z0-9]+', name):
+                    msg = 'name must contain only characters and numbers !'
+                else:
+                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                    cursor.execute(
+                        'INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
+                    mysql.connection.commit()
+                    msg = 'The details of the cat is added into database ！'
         else:
             msg = 'Name, Age, Sex could not be null !'
     elif request.method == 'POST':
         msg = 'Please fill out the form !'
-    return msg
+    return jsonify({
+        "error": False,
+        'message': msg,
+    })
 
 
 @app.route('/updateDetails/<int:id>', methods=['PUT'])
