@@ -1,10 +1,10 @@
 # Store this code in 'app.py' file
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+import json
 from flask_mysqldb import MySQL
-import MySQLdb.cursors
-import re
+from flask_mqtt import Mqtt
 from flask_swagger_ui import get_swaggerui_blueprint
-from datetime import date
+from controllers import frontend_controller, mqtt_controller
 
 
 app = Flask(__name__)
@@ -42,174 +42,98 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'p@ssword'
 app.config['MYSQL_DB'] = 'kitty'
 
+app.config['MQTT_BROKER_URL'] = 'a3s8fm7ruabocj-ats.iot.eu-west-1.amazonaws.com'
+app.config['MQTT_BROKER_PORT'] = 8883
+app.config['MQTT_TLS_ENABLED'] = True
+app.config['MQTT_TLS_INSECURE'] = True
+app.config['MQTT_TLS_VERSION'] = 2
+app.config['MQTT_TLS_CA_CERTS'] = 'certs/AmazonRootCA1.pem'
+app.config['MQTT_TLS_CERTFILE'] = 'certs/certificate.pem.crt'
+app.config['MQTT_TLS_KEYFILE'] = 'certs/private.pem.key'
+
 
 mysql = MySQL(app)
+mqtt_client = Mqtt(app)
 
 
 @app.route('/getDetails', methods=['GET'])
 def get_details():
-    id = request.args.get("id")
-    if len(id) != 0:
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (int(id), ))
-        results = cursor.fetchone()
-        if results:
-            return jsonify(results)
-        else:
-            return "The cat doesn't exist in database."
-    else:
-        return "Pet's id could not be null."
+    return frontend_controller.get_details()
 
 
 @app.route('/addACat', methods=['POST'])
 def add_a_cat():
-    msg = ''
-    if request.method == 'POST':
-        req_data = request.get_json()
-        if req_data and "name" in req_data and "age" in req_data and "sex" in req_data:
-            name = req_data["name"]
-            age = req_data["age"]
-            sex = req_data["sex"]
-            if (len(name) > 0) & (len(age) > 0) & (len(sex) > 0):
-                if not re.match(r'[A-Za-z0-9]+', name):
-                    msg = 'name must contain only characters and numbers !'
-                else:
-                    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                    cursor.execute(
-                        'INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
-                    mysql.connection.commit()
-                    msg = 'The details of the cat is added into database ！'
-        else:
-            msg = 'Name, Age, Sex could not be null !'
-    elif request.method == 'POST':
-        msg = 'Please fill out the form !'
-    return jsonify({
-        "error": False,
-        'message': msg,
-    })
+    return frontend_controller.add_a_cat()
 
 
 @app.route('/updateDetails/<int:id>', methods=['PUT'])
 def update_details(id):
-    msg = ''
-    if request.method == 'PUT':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (id, ))
-        results = cursor.fetchone()
-        if results:
-            name = request.form['name']
-            age = request.form['age']
-            sex = request.form['sex']
-            try:
-                cursor.execute(
-                    'UPDATE pets SET NAME =% s, age =% s, sex =% s WHERE id =% s', (name, age, sex, (id, ), ))
-                mysql.connection.commit()
-                msg = 'The details of the cat is updated ！'
-            except:
-                return 'There was a problem updating...'
-        else:
-            msg = "The cat doesn't exist in database."
-    return msg
+    return frontend_controller.update_details(id)
 
 
 @app.route('/deleteACat/<int:id>', methods=['DELETE'])
 def delete_a_cat(id):
-    msg = ''
-    if request.method == 'DELETE':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (id, ))
-        results = cursor.fetchone()
-        if results:
-            try:
-                cursor.execute('DELETE FROM pets WHERE id =% s', (id, ))
-                mysql.connection.commit()
-                msg = 'The details of the cat is deleted ！'
-            except:
-                return 'There was a problem deleting...'
-        else:
-            msg = "The cat doesn't exist in database."
-    return msg
-
-
-# @app.route('/addWeight', methods=['POST'])
-# def add_weight():
-#     msg = ''
-#     if request.method == 'POST' and 'id' in request.form and 'weight' in request.form and 'date' in request.form:
-#         id = request.form['id']
-#         weight = request.form['weight']
-#         date = request.form['date']
-#         if (len(id) > 0) & (len(weight) > 0) & (len(date) > 0):
-#             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-#             cursor.execute(
-#                 'REPLACE INTO weight VALUES (NULL, % s, % s, % s)', (id, weight, date,))
-#             mysql.connection.commit()
-#             msg = 'The details of the cat is added into database ！'
-#         else:
-#             msg = 'Id, weight, date could not be null !'
-#     elif request.method == 'POST':
-#         msg = 'Please fill out the form !'
-#     return jsonify(msg)
-
-
-@app.route('/addWeight', methods=['POST'])
-def add_weight():
-    msg = ''
-    if request.method == 'POST':
-        req_data = request.get_json()
-        if req_data and "id" in req_data and "weight" in req_data:
-            id = req_data["id"]
-            weight = req_data["weight"]
-            today = date.today()
-            if id is not None and id > 0 and weight is not None and weight > 0:
-                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(
-                    'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
-                    (id, weight, today,)
-                )
-                mysql.connection.commit()
-                msg = 'The weight of the cat is added into database!'
-            else:
-                msg = 'Invalid request data! Please provide valid id, weight and date.'
-            feedingDuration = 0
-        else:
-            msg = 'Invalid request data! Please provide id, weight and date.'
-            feedingDuration = 0
-    return jsonify({
-        'feedingDuration': feedingDuration,
-        'message': msg
-    })
+    return frontend_controller.delete_a_cat(id)
 
 
 @app.route('/getWeight', methods=['GET'])
 def get_weight():
-    id = request.args.get("id")
-    if len(id) != 0:
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(
-            'SELECT * FROM weight WHERE id = % s ORDER BY weight_date', (int(id), ))
-        results = cursor.fetchall()
-        if results:
-            # format date as "yyyy-MM-dd"
-            for row in results:
-                row['weight_date'] = row['weight_date'].strftime('%Y-%m-%d')
-            # return results as JSON response
-            return jsonify({
-                "error": False,
-                "message": "Success",
-                "data": results
-            })
-        else:
-            return jsonify({
-                "error": True,
-                "message": "No data for the cat.",
-                "data": []
-            })
+    return frontend_controller.get_weight()
+
+
+@app.route('/addWeight', methods=['POST'])
+def add_weight():
+    return frontend_controller.add_weight()
+
+
+###############
+# MQTT handling
+###############
+def add_weight(client, userdata, message):
+    return mqtt_controller.add_weight(client, userdata, message)
+
+
+# Define functions to handle each topic
+def flask_test(client, userdata, message):
+    data = dict(
+        topic=message.topic,
+        payload=message.payload.decode()
+    )
+    print(
+        'Received message on topic: {topic} with payload: {payload}'.format(**data))
+
+
+topic_handlers = {
+    'add_weight': add_weight,
+    '/flask/mqtt': flask_test
+}
+
+
+@mqtt_client.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print('Connected successfully')
+        for topic in topic_handlers.keys():
+            mqtt_client.subscribe(topic)  # subscribe topic
     else:
-        return jsonify({
-            "error": True,
-            "message": "Pet's id could not be null.",
-            "data": []
-        })
+        print('Bad connection. Code:', rc)
+
+
+@mqtt_client.on_message()
+def handle_mqtt_message(client, userdata, message):
+    topic = message.topic
+    if topic in topic_handlers:
+        topic_handlers[topic](client, userdata, message)
+    else:
+        print(f'No handler found for topic {topic}')
+
+
+@app.route('/publish', methods=['POST'])
+def publish_message():
+    request_data = request.get_json()
+    publish_result = mqtt_client.publish(
+        request_data['topic'], json.dumps({'msg': request_data['msg']}))
+    return jsonify({'code': publish_result[0]})
 
 
 if __name__ == "__main__":
