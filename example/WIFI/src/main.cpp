@@ -67,6 +67,8 @@ void loop() {
 #include <HTTPClient.h>
 
  
+//const char* ssid = "S";
+//const char* password =  "43211234";
 const char* ssid = "iPhone";
 const char* password =  "1234qwer";
 //const char* ssid = "VM3400696";
@@ -89,7 +91,47 @@ void setup() {
 }
  
 void loop() {
+  /*if ((WiFi.status() == WL_CONNECTED)) { //Check the current connection status
  
+    HTTPClient http;
+ 
+    http.begin("http://192.168.43.172:8000/getWeight?id=2"); //Specify the URL
+    int httpCode = http.GET();                                        //Make the request
+ 
+    if (httpCode > 0) { //Check for the returning code
+ 
+        String payload = http.getString();
+        Serial.println(httpCode);
+        Serial.println(payload);
+      }
+ 
+    else {
+      Serial.println("Error on HTTP request");
+    }
+  
+    
+
+    http.begin("http://192.168.43.172:8000/addWeight");
+    http.addHeader( "Content-Type", "application/json");
+
+    // Add the form data as payload
+    String payload = "{\r\n    \"id\": 2,\r\n    \"weight\": 4.1\r\n  }";
+
+    httpCode = http.POST(payload);                                        //Make the request
+ 
+    if (httpCode > 0) { //Check for the returning code
+ 
+        String payload = http.getString();
+        Serial.println(httpCode);
+        Serial.println(payload);
+      }
+ 
+    else {
+      Serial.println("Error on HTTP request");
+    }
+
+    http.end(); //Free the resources
+  }*/
   if ((WiFi.status() == WL_CONNECTED)) { //Check the current connection status
  
     HTTPClient http;
@@ -111,11 +153,11 @@ void loop() {
     
 
     http.begin("https://ec2-34-247-173-84.eu-west-1.compute.amazonaws.com/addWeight");
-    http.addHeader("Content-Type", "multipart/form-data; boundary=wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T");
+   
+    http.addHeader( "Content-Type", "application/json");
 
     // Add the form data as payload
-    String payload = "b'--wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T\r\nContent-Disposition: form-data; name=id;\r\nContent-Type: text/plain\r\n\r\n1\r\n--wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T\r\nContent-Disposition: form-data; name=weight;\r\nContent-Type: text/plain\r\n\r\n4.88\r\n--wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T\r\nContent-Disposition: form-data; name=date;\r\nContent-Type: text/plain\r\n\r\n2023-2-9\r\n--wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T--\r\n'";
-
+    String payload = "{\r\n    \"id\": 2,\r\n    \"weight\": 4.1\r\n  }";
     httpCode = http.POST(payload);                                        //Make the request
  
     if (httpCode > 0) { //Check for the returning code
