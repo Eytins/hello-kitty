@@ -1,5 +1,4 @@
 from flask import jsonify, request
-import MySQLdb.cursors
 import re
 from datetime import date
 from db import db, cursor
