@@ -1,10 +1,10 @@
 # Store this code in 'app.py' file
 from flask import Flask, request, jsonify
-import json
 from flask_mysqldb import MySQL
 from flask_mqtt import Mqtt
 from flask_swagger_ui import get_swaggerui_blueprint
 from controllers import frontend_controller, mqtt_controller
+import json
 
 
 app = Flask(__name__)
@@ -93,6 +93,8 @@ def def_meal_time():
 ###############
 # MQTT handling
 ###############
+
+
 def add_weight(client, userdata, message):
     return mqtt_controller.add_weight(client, userdata, message)
 
@@ -123,6 +125,7 @@ def handle_connect(client, userdata, flags, rc):
         print('Connected successfully')
         for topic in topic_handlers.keys():
             mqtt_client.subscribe(topic)  # subscribe topic
+            print(f'Subscribed topic {topic}')
     else:
         print('Bad connection. Code:', rc)
 
@@ -139,8 +142,9 @@ def handle_mqtt_message(client, userdata, message):
 @app.route('/publish', methods=['POST'])
 def publish_message():
     request_data = request.get_json()
+    maunualFeeding = request_data['msg']
     publish_result = mqtt_client.publish(
-        request_data['topic'], json.dumps({'msg': request_data['msg']}))
+        request_data['topic'], json.dumps(maunualFeeding))
     return jsonify({'code': publish_result[0]})
 
 
