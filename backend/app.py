@@ -142,9 +142,9 @@ def handle_mqtt_message(client, userdata, message):
 @app.route('/publish', methods=['POST'])
 def publish_message():
     request_data = request.get_json()
-    maunualFeeding = request_data['msg']
+    # maunualFeeding = request_data['msg']
     publish_result = mqtt_client.publish(
-        request_data['topic'], json.dumps(maunualFeeding))
+        request_data['topic'], json.dumps({'message': request_data['message']}))
     return jsonify({'code': publish_result[0]})
 
 

@@ -13,7 +13,7 @@ def add_weight(client, userdata, message):
     temperature = req_data['temperature']
     humidity = req_data['humidity']
     today = date.today()
-    if id is not None and id > 0 and weight is not None and weight > 0:
+    if id is not None and id > 0 and weight is not None:
         cursor.execute(
             'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
             (id, weight, today,)
@@ -21,7 +21,8 @@ def add_weight(client, userdata, message):
         db.commit()
         msg = 'The weight of the cat is added into database!'
         feedingDuration = algorithm(weight, temperature, humidity)
-        client.publish("esp32/aws2esp", feedingDuration)
+        client.publish("esp32/aws2esp",
+                       json.dumps({"message": feedingDuration}))
     else:
         msg = 'Invalid request data! Please provide valid id, weight and date.'
     print(msg)
