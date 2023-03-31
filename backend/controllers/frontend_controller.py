@@ -136,3 +136,12 @@ def add_weight():
         'feedingDuration': feedingDuration,
         'message': msg
     })
+
+
+def def_meal_time():
+    msg = ''
+    if request.method == 'POST':
+        req_data = request.get_json()
+        if req_data and "owner_name" in req_data and "per_name" in req_data\
+            and "start_time" in req_data and "end_time" in req_data:
+            pass
