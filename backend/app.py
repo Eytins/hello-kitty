@@ -86,10 +86,18 @@ def add_weight():
     return frontend_controller.add_weight()
 
 
+@app.route('/defMealTime', methods=['POST'])
+def def_meal_time():
+    return frontend_controller.def_meal_time()
+
 ###############
 # MQTT handling
 ###############
 def add_weight(client, userdata, message):
+    return mqtt_controller.add_weight(client, userdata, message)
+
+
+def less_food(client, userdata, message):
     return mqtt_controller.add_weight(client, userdata, message)
 
 
@@ -104,7 +112,7 @@ def flask_test(client, userdata, message):
 
 
 topic_handlers = {
-    'add_weight': add_weight,
+    'esp32/humidity_temperature_weight': add_weight,
     '/flask/mqtt': flask_test
 }
 
