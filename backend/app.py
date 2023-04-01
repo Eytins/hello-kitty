@@ -142,9 +142,16 @@ def handle_mqtt_message(client, userdata, message):
 @app.route('/publish', methods=['POST'])
 def publish_message():
     request_data = request.get_json()
-    # maunualFeeding = request_data['msg']
     publish_result = mqtt_client.publish(
-        request_data['topic'], json.dumps({'message': request_data['message']}))
+        request_data['topic'], json.dumps({'message': request_data['msg']}))
+    return jsonify({'code': publish_result[0]})
+
+
+@app.route('/publish/mock', methods=['POST'])
+def publish_message_mock():
+    request_data = request.get_json()
+    publish_result = mqtt_client.publish(
+        request_data['topic'], json.dumps(request_data['message']))
     return jsonify({'code': publish_result[0]})
 
 
