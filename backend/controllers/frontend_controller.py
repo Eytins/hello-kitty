@@ -142,5 +142,36 @@ def def_meal_time():
     if request.method == 'POST':
         req_data = request.get_json()
         if req_data and "owner_name" in req_data and "per_name" in req_data\
-            and "start_time" in req_data and "end_time" in req_data:
+                and "start_time" in req_data and "end_time" in req_data:
             pass
+
+
+def get_feeding_records():
+    id = request.args.get("id")
+    if len(id) != 0:
+        cursor.execute(
+            'SELECT * FROM feeding_records WHERE id = % s ORDER BY feed_date', (int(id), ))
+        results = cursor.fetchall()
+        if results:
+            # format date as "yyyy-MM-dd"
+            for row in results:
+                row['feed_date'] = row['feed_date'].strftime(
+                    '%Y-%m-%d %H:%M')
+            # return results as JSON response
+            return jsonify({
+                "error": False,
+                "message": "Success",
+                "data": results
+            })
+        else:
+            return jsonify({
+                "error": True,
+                "message": "No data for the cat.",
+                "data": []
+            })
+    else:
+        return jsonify({
+            "error": True,
+            "message": "Pet's id could not be null.",
+            "data": []
+        })

@@ -1,10 +1,12 @@
 # Store this code in 'app.py' file
+import MySQLdb
 from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_mqtt import Mqtt
 from flask_swagger_ui import get_swaggerui_blueprint
 from controllers import frontend_controller, mqtt_controller
 import json
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -90,6 +92,12 @@ def add_weight():
 def def_meal_time():
     return frontend_controller.def_meal_time()
 
+
+@app.route('/getFeedingRecords', methods=['GET'])
+def get_feeding_records():
+    return frontend_controller.get_feeding_records()
+
+
 ###############
 # MQTT handling
 ###############
@@ -144,6 +152,16 @@ def publish_message():
     request_data = request.get_json()
     publish_result = mqtt_client.publish(
         request_data['topic'], json.dumps({'message': request_data['msg']}))
+    # mannual feeding
+    id = request_data['id']
+    currentDateAndTime = datetime.now()
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(
+        'insert into feeding_records values(NULL, %s, %s, %s, %s)',
+        (id, "Manual", 5, currentDateAndTime,)
+    )
+    mysql.connection.commit()
+    print("Mannual feeding completed!")
     return jsonify({'code': publish_result[0]})
 
 

@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, datetime
 from db import db, cursor
 
 
@@ -13,14 +13,20 @@ def add_weight(client, userdata, message):
     temperature = req_data['temperature']
     humidity = req_data['humidity']
     today = date.today()
+    currentDateAndTime = datetime.now()
     if id is not None and id > 0 and weight is not None:
         cursor.execute(
             'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
             (id, weight, today,)
         )
-        db.commit()
         msg = 'The weight of the cat is added into database!'
         feedingDuration = algorithm(weight, temperature, humidity)
+        food_weight = feedingDuration * 1
+        cursor.execute(
+            'insert into feeding_records values(NULL, %s, %s, %s, %s)',
+            (id, "Auto", food_weight, currentDateAndTime,)
+        )
+        db.commit()
         client.publish("esp32/aws2esp",
                        json.dumps({"message": feedingDuration}))
     else:
