@@ -28,7 +28,7 @@ def add_weight(client, userdata, message):
         )
         db.commit()
         client.publish("esp32/aws2esp",
-                       json.dumps({"message": feedingDuration}))
+                       json.dumps({"message": f"{feedingDuration}"}))
     else:
         msg = 'Invalid request data! Please provide valid id, weight and date.'
     print(msg)

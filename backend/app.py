@@ -151,7 +151,7 @@ def handle_mqtt_message(client, userdata, message):
 def publish_message():
     request_data = request.get_json()
     publish_result = mqtt_client.publish(
-        request_data['topic'], json.dumps({'message': request_data['msg']}))
+        request_data['topic'], json.dumps({'message': f"{request_data['msg']}"}))
     # mannual feeding
     id = request_data['id']
     currentDateAndTime = datetime.now()
