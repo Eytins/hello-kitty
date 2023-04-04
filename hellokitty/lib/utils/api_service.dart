@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import './constants.dart';
 import '../model/pet_weight_model.dart';
-import '../model/feeding_records.dart';
+import '../model/feeding_data.dart';
 
 class ApiService {
   Future<List<PetWeight>?> getPetWeights() async {

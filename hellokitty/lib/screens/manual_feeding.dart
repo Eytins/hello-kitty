@@ -36,7 +36,7 @@ class ManualFeeding extends StatelessWidget {
                       Response rsp = await dioClient
                           .post(ApiConstants.manualFeeding, data: reqData);
                       if (rsp.statusCode == 200 && rsp.data != null) {
-                        debugPrint('Dio: response $rsp');
+                        debugPrint('http: response $rsp');
                         showDialog(
                           context: context,
                           builder: (context) {
@@ -53,7 +53,7 @@ class ManualFeeding extends StatelessWidget {
                             );
                           },
                         );
-                        await Future.delayed(Duration(seconds: 2));
+                        await Future.delayed(Duration(seconds: 3));
                         Navigator.pop(context);
                       }
                     } on DioError catch (e) {
