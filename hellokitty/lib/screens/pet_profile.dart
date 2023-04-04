@@ -3,7 +3,9 @@ import '../components/custom_appbar.dart';
 import '../components/path_config.dart';
 
 class PetProfile extends StatelessWidget {
-  const PetProfile({super.key});
+  // const PetProfile({super.key});
+  PetProfile({Key? key}) : super(key: key);
+
   final String title = "Pet Profile";
   final bool hasCat = false;
 

@@ -7,7 +7,8 @@ import '../components/task_list.dart';
 import 'package:simple_time_range_picker/simple_time_range_picker.dart';
 
 class AutoFeeding extends StatelessWidget {
-  const AutoFeeding({super.key});
+  // const AutoFeeding({super.key});
+  const AutoFeeding({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

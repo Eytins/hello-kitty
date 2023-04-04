@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class WeightChart extends StatefulWidget {
-  const WeightChart({super.key});
+  // const WeightChart({super.key});
+  const WeightChart({Key? key}) : super(key: key);
 
   @override
   State<WeightChart> createState() => _WeightChartState();

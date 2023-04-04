@@ -8,4 +8,5 @@ class ApiConstants {
   static String addWeight = '$baseUrl/addWeight';
   static String getWeight = '$baseUrl/getWeight?id=11';
   static String manualFeeding = '$baseUrl/publish';
+  static String getRecords = '$baseUrl/getFeedingRecords?id=11';
 }

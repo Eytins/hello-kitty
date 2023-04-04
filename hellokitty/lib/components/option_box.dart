@@ -8,11 +8,17 @@ class CustomOptionBox extends StatelessWidget {
   final String optionName;
   final String iconPath;
 
-  CustomOptionBox({
-    super.key,
+  // CustomOptionBox({
+  //   super.key,
+  //   required this.optionName,
+  //   required this.iconPath,
+  // });
+
+  const CustomOptionBox({
+    Key? key,
     required this.optionName,
     required this.iconPath,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

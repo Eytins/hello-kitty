@@ -5,7 +5,8 @@ import '../routes/app_routes.dart';
 import '../components/path_config.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  // const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -41,9 +42,14 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.pushNamed(context, Routes.camera);
                     }, // Image tapped
-                    child: Image.asset(
-                      'assets/icons/menu.png',
-                      height: 45,
+                    // child: Image.asset(
+                    //   'assets/icons/menu.png',
+                    //   height: 45,
+                    //   color: Colors.grey[800],
+                    // ),
+                    child: Icon(
+                      Icons.camera_alt_outlined,
+                      size: 45,
                       color: Colors.grey[800],
                     ),
                   ),

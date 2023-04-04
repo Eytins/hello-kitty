@@ -5,7 +5,8 @@ import '../components/square_tile.dart';
 import '../routes/app_routes.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
+  // LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();

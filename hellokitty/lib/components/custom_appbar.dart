@@ -6,13 +6,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color backgroudColor;
   final double height;
 
+  // const CustomAppBar({
+  //   super.key,
+  //   required this.title,
+  //   required this.iconPath,
+  //   required this.backgroudColor,
+  //   required this.height,
+  // });
+
   const CustomAppBar({
-    super.key,
+    Key? key,
     required this.title,
     required this.iconPath,
     required this.backgroudColor,
     required this.height,
-  });
+  }) : super(key: key);
 
   @override
   Size get preferredSize => Size.fromHeight(height);

@@ -5,7 +5,9 @@ import '../components/path_config.dart';
 import 'package:dio/dio.dart';
 
 class ManualFeeding extends StatelessWidget {
-  ManualFeeding({super.key});
+  // ManualFeeding({super.key});
+  ManualFeeding({Key? key}) : super(key: key);
+
   final dioClient = Dio();
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,11 @@ class ManualFeeding extends StatelessWidget {
                   onPressed: () async {
                     //  send feeding request to backend
                     try {
-                      var reqData = {"topic": "esp32/aws2esp", "msg": 999};
+                      var reqData = {
+                        "topic": "esp32/aws2esp",
+                        "msg": 999,
+                        "id": 11,
+                      };
                       Response rsp = await dioClient
                           .post(ApiConstants.manualFeeding, data: reqData);
                       if (rsp.statusCode == 200 && rsp.data != null) {
