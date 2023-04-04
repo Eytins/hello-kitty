@@ -1,16 +1,15 @@
 from flask import jsonify, request
-import MySQLdb.cursors
 import re
 from datetime import date
-from db import db, cursor
+from db import DB
 
 
 def get_details():
     id = request.args.get("id")
     msg = ''
     if len(id) != 0:
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (int(id), ))
-        results = cursor.fetchone()
+        results = DB().executeQuery('SELECT * FROM pets WHERE id = % s', (int(id), ))
+        # results = cursor.fetchone()
         if results:
             return jsonify(results)
         else:
@@ -31,9 +30,9 @@ def add_a_cat():
             if not re.match(r'[A-Za-z0-9]+', name):
                 msg = 'name must contain only characters and numbers !'
             else:
-                cursor.execute(
+                DB().execute(
                     'INSERT INTO pets VALUES (NULL, % s, % s, % s)', (name, age, sex,))
-                db.commit()
+                # db.commit()
                 msg = 'The details of the cat is added into database ！'
     else:
         msg = 'Name, Age, Sex could not be null !'
@@ -46,16 +45,16 @@ def add_a_cat():
 def update_details(id):
     msg = ''
     if request.method == 'PUT':
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (id, ))
-        results = cursor.fetchone()
+        results = DB().executeQuery('SELECT * FROM pets WHERE id = % s', (id, ))
+        # results = cursor.fetchone()
         if results:
             name = request.form['name']
             age = request.form['age']
             sex = request.form['sex']
             try:
-                cursor.execute(
+                DB().execute(
                     'UPDATE pets SET NAME =% s, age =% s, sex =% s WHERE id =% s', (name, age, sex, (id, ), ))
-                db.commit()
+                # db.commit()
                 msg = 'The details of the cat is updated ！'
             except:
                 return 'There was a problem updating...'
@@ -67,12 +66,12 @@ def update_details(id):
 def delete_a_cat(id):
     msg = ''
     if request.method == 'DELETE':
-        cursor.execute('SELECT * FROM pets WHERE id = % s', (id, ))
-        results = cursor.fetchone()
+        results = DB().execute('SELECT * FROM pets WHERE id = % s', (id, ))
+        # results = cursor.fetchone()
         if results:
             try:
-                cursor.execute('DELETE FROM pets WHERE id =% s', (id, ))
-                db.commit()
+                DB().execute('DELETE FROM pets WHERE id =% s', (id, ))
+                # db.commit()
                 msg = 'The details of the cat is deleted ！'
             except:
                 return 'There was a problem deleting...'
@@ -84,9 +83,9 @@ def delete_a_cat(id):
 def get_weight():
     id = request.args.get("id")
     if len(id) != 0:
-        cursor.execute(
+        results = DB().executeQuery(
             'SELECT * FROM weight WHERE id = % s ORDER BY weight_date', (int(id), ))
-        results = cursor.fetchall()
+        # results = cursor.fetchall()
         if results:
             # format date as "yyyy-MM-dd"
             for row in results:
@@ -120,11 +119,11 @@ def add_weight():
             weight = req_data["weight"]
             today = date.today()
             if id is not None and id > 0 and weight is not None and weight > 0:
-                cursor.execute(
+                DB().execute(
                     'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
                     (id, weight, today,)
                 )
-                db.commit()
+                # db.commit()
                 msg = 'The weight of the cat is added into database!'
             else:
                 msg = 'Invalid request data! Please provide valid id, weight and date.'
@@ -136,3 +135,43 @@ def add_weight():
         'feedingDuration': feedingDuration,
         'message': msg
     })
+
+
+def def_meal_time():
+    msg = ''
+    if request.method == 'POST':
+        req_data = request.get_json()
+        if req_data and "owner_name" in req_data and "per_name" in req_data\
+                and "start_time" in req_data and "end_time" in req_data:
+            pass
+
+
+def get_feeding_records():
+    id = request.args.get("id")
+    if len(id) != 0:
+        results = DB().executeQuery(
+            'SELECT * FROM feeding_records WHERE id = % s ORDER BY feed_date DESC', (int(id), ))
+        # results = cursor.fetchall()
+        if results:
+            # format date as "yyyy-MM-dd"
+            for row in results:
+                row['feed_date'] = row['feed_date'].strftime(
+                    '%Y-%m-%d %H:%M:%S')
+            # return results as JSON response
+            return jsonify({
+                "error": False,
+                "message": "Success",
+                "data": results
+            })
+        else:
+            return jsonify({
+                "error": True,
+                "message": "No data for the cat.",
+                "data": []
+            })
+    else:
+        return jsonify({
+            "error": True,
+            "message": "Pet's id could not be null.",
+            "data": []
+        })

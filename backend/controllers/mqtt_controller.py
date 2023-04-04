@@ -1,31 +1,38 @@
-from flask import request, jsonify
 import json
-from datetime import date
-from db import db, cursor
+from datetime import date, datetime
+from db import DB
 
 
 # Define functions to handle each topic
 def add_weight(client, userdata, message):
     # Do something with the message for topic add_weight
     req_data = json.loads(message.payload.decode())
-    id = req_data['msg']['id']
-    weight = req_data['msg']["weight"]
+    print(req_data)
+    id = req_data['id']
+    weight = req_data['weight']
+    temperature = req_data['temperature']
+    humidity = req_data['humidity']
     today = date.today()
-    print(id, weight, today)
-    if id is not None and id > 0 and weight is not None and weight > 0:
-        # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        # cursor.execute("SET max_allowed_pa​​cket=1073741824")
-        cursor.execute(
+    currentDateAndTime = datetime.now()
+    if id is not None and id > 0 and weight is not None:
+        DB().execute(
             'REPLACE INTO weight VALUES (NULL, %s, %s, %s)',
             (id, weight, today,)
         )
-        # mysql.connection.commit()
-        db.commit()
         msg = 'The weight of the cat is added into database!'
+        feedingDuration = algorithm(weight, temperature, humidity)
+        food_weight = feedingDuration * 1
+        DB().execute(
+            'insert into feeding_records values(NULL, %s, %s, %s, %s)',
+            (id, "Auto", food_weight, currentDateAndTime,)
+        )
+        # db.commit()
+        client.publish("esp32/aws2esp",
+                       json.dumps({"message": f"{feedingDuration}"}))
     else:
         msg = 'Invalid request data! Please provide valid id, weight and date.'
-    feedingDuration = 0
-    # return jsonify({
-    #     'feedingDuration': feedingDuration,
-    #     'message': msg
-    # })
+    print(msg)
+
+
+def algorithm(weight, temperature, humidity):
+    return 3
