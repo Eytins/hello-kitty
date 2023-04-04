@@ -1,12 +1,13 @@
 # Store this code in 'app.py' file
-import MySQLdb
+# import MySQLdb
+# from flask_mysqldb import MySQL
 from flask import Flask, request, jsonify
-from flask_mysqldb import MySQL
 from flask_mqtt import Mqtt
 from flask_swagger_ui import get_swaggerui_blueprint
 from controllers import frontend_controller, mqtt_controller
 import json
 from datetime import datetime
+from db import DB
 
 
 app = Flask(__name__)
@@ -35,15 +36,11 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 
 app.register_blueprint(swaggerui_blueprint)
 
-
 app.secret_key = 'your secret key'
-
-
-app.config['MYSQL_HOST'] = 'ec2-34-246-195-200.eu-west-1.compute.amazonaws.com'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'p@ssword'
-app.config['MYSQL_DB'] = 'kitty'
-
+# app.config['MYSQL_HOST'] = 'ec2-34-246-195-200.eu-west-1.compute.amazonaws.com'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_PASSWORD'] = 'p@ssword'
+# app.config['MYSQL_DB'] = 'kitty'
 app.config['MQTT_BROKER_URL'] = 'a3s8fm7ruabocj-ats.iot.eu-west-1.amazonaws.com'
 app.config['MQTT_BROKER_PORT'] = 8883
 app.config['MQTT_TLS_ENABLED'] = True
@@ -54,7 +51,7 @@ app.config['MQTT_TLS_CERTFILE'] = 'certs/certificate.pem.crt'
 app.config['MQTT_TLS_KEYFILE'] = 'certs/private.pem.key'
 
 
-mysql = MySQL(app)
+# mysql = MySQL(app)
 mqtt_client = Mqtt(app)
 
 
@@ -155,12 +152,12 @@ def publish_message():
     # mannual feeding
     id = request_data['id']
     currentDateAndTime = datetime.now()
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute(
+    # cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    DB().execute(
         'insert into feeding_records values(NULL, %s, %s, %s, %s)',
         (id, "Manual", 5, currentDateAndTime,)
     )
-    mysql.connection.commit()
+    # mysql.connection.commit()
     print("Mannual feeding completed!")
     return jsonify({'code': publish_result[0]})
 
