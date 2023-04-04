@@ -150,7 +150,7 @@ def get_feeding_records():
     id = request.args.get("id")
     if len(id) != 0:
         cursor.execute(
-            'SELECT * FROM feeding_records WHERE id = % s ORDER BY feed_date', (int(id), ))
+            'SELECT * FROM feeding_records WHERE id = % s ORDER BY feed_date DESC', (int(id), ))
         results = cursor.fetchall()
         if results:
             # format date as "yyyy-MM-dd"
