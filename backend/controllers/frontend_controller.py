@@ -156,7 +156,7 @@ def get_feeding_records():
             # format date as "yyyy-MM-dd"
             for row in results:
                 row['feed_date'] = row['feed_date'].strftime(
-                    '%Y-%m-%d %H:%M')
+                    '%Y-%m-%d %H:%M:%S')
             # return results as JSON response
             return jsonify({
                 "error": False,
