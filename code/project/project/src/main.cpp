@@ -1,7 +1,6 @@
 #include "secrets.h"
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
-#include <MQTTClient.h>
 #include <ArduinoJson.h>
 #include "WiFi.h"
 #include <Adafruit_Sensor.h>
@@ -18,15 +17,12 @@ const int LOADCELL_DOUT_PIN = 32;
 const int LOADCELL_SCK_PIN = 33;
 HX711 scale;
 
-
 //light
 const int PIN_RED   = 13;
 const int PIN_GREEN = 12;
 const int PIN_BLUE  = 0;
-
 const int Distance_sensor = 2;
 const int Distance_light  = 15;
-
 
 void setColor(int R, int G, int B) {
   analogWrite(PIN_RED,   R);
@@ -34,15 +30,11 @@ void setColor(int R, int G, int B) {
   analogWrite(PIN_BLUE,  B);
 }
 
-
-
-
 float humidity ;
 float temperature;
 float weight;
 float distance;
 int flag = 1;
-
 
 //motor
 int freq = 50;      // 频率(20ms周期)
@@ -73,18 +65,18 @@ void openlid(int second){
       setColor(52, 168, 83);
       delay(1000); // keep the color 1 second
       //closed
-      int d = 180;
+      int d = 170;
       ledcWrite(channel, calculatePWM(d)); // 输出PWM
       Serial.printf("openning value=%d,calcu=%d\n", d, calculatePWM(d));
       delay(1000);
       //open
-      d = 90;
+      d = 100;
       ledcWrite(channel, calculatePWM(d)); // 输出PWM
       Serial.printf("opened value=%d,calcu=%d\n", d, calculatePWM(d));
       delay(second);
       Serial.printf("delay=%d\n", second);
       //close again
-      d = 180;
+      d = 170;
       ledcWrite(channel, calculatePWM(d)); // 输出PWM
       Serial.printf("closing value=%d,calcu=%d\n", d, calculatePWM(d));
       setColor(0,0,0);
@@ -97,8 +89,6 @@ void openlid(int second){
 #define AWS_IOT_PUBLISH_TOPIC2   "esp32/distance"
 //data from aws to esp32
 #define AWS_IOT_SUBSCRIBE_TOPIC "esp32/aws2esp"
-
-const int bufferSize = 1024 * 23; // 23552 bytes
 
 
 WiFiClientSecure net = WiFiClientSecure();
@@ -113,14 +103,11 @@ void messageHandler(char* topic, byte* payload, unsigned int length)
   StaticJsonDocument<200> doc;
   deserializeJson(doc, payload);
   const char* message = doc["message"];
-  if(strcmp(message,"xxx") == 0){
+  if(strcmp(message,"999") == 0){
        openlid(3000);
+  }else if(strcmp(message,"3") == 0){
+     openlid(3000);
   }
-  // Serial.println(message);
-  // const char* maunualFeeding = doc["maunualFeeding"];
-  // if(strcmp(maunualFeeding,"999") == 0){
-  //      openlid(3000);
-  // }
   Serial.println(message);
 }
  
@@ -245,10 +232,11 @@ void setup()
   Serial.begin(9600);
   scaleinit();
   dht.begin();
-  pinMode(18,OUTPUT);
+  pinMode(Distance_light,OUTPUT);
+  
+  // pinMode(18,OUTPUT);
   ledcSetup(channel, freq, resolution_motor); // 设置通道
   ledcAttachPin(led, channel);          // 将通道与对应的引脚连接
-  //openlid(4000);
   connectAWS();
 
 }
@@ -261,11 +249,15 @@ void loop()
   distance = get_distance(); 
   if (distance == 1){
     digitalWrite(Distance_light,HIGH);
+  }else{
+    digitalWrite(Distance_light,LOW);
   }
 
  
   if (isnan(humidity) || isnan(temperature) || isnan(weight) || isnan(distance))  // Check if any reads failed and exit early (to try again).
   {
+    temperature = 24;
+    humidity = 23;
     Serial.println("humidity:");
     Serial.println(humidity);
     Serial.println("temperature:");
@@ -275,13 +267,23 @@ void loop()
     Serial.println("distance:");
     Serial.println(distance);
     Serial.println(F("Failed to read from sensor!"));
-    return;
   }
 
   if(flag){
-    publishMessage1();
-    flag = 0;
+    if(weight > 5){
+      publishMessage1();
+      flag = 0;
+    }
+    
   }
+  //Serial.println("humidity:");
+  //Serial.println(humidity);
+  //Serial.println("temperature:");
+  //Serial.println(temperature);
+  //Serial.println("weight:");
+  //Serial.println(weight);
+  //Serial.println("distance:");
+  //Serial.println(distance);
   
   publishMessage2();
   client.loop();
