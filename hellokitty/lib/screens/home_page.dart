@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../components/option_box.dart';
 import '../routes/app_routes.dart';
 import '../components/path_config.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class HomePage extends StatefulWidget {
   // const HomePage({super.key});
@@ -81,9 +82,14 @@ class _HomePageState extends State<HomePage> {
                     "Welcome Home,",
                     style: TextStyle(fontSize: 20, color: Colors.grey.shade800),
                   ),
-                  Text(
-                    'Pooki',
-                    style: GoogleFonts.bebasNeue(fontSize: 72),
+                  InkWell(
+                    child: Text(
+                      'Pooki',
+                      style: GoogleFonts.bebasNeue(fontSize: 72),
+                    ),
+                    onTap: () {
+                      showNotification();
+                    },
                   ),
                 ],
               ),
@@ -145,6 +151,50 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  showNotification() async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const initializationSettingsIOS = DarwinInitializationSettings();
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
+
+    AndroidNotificationChannel channel = const AndroidNotificationChannel(
+      'high channel',
+      'Very important notification!!',
+      description: 'Too little cat food, please add it in time!',
+      importance: Importance.max,
+    );
+
+    const androidNotificationDetail = AndroidNotificationDetails(
+        '0', // channel Id
+        'general' // channel Name
+        );
+    const iosNotificatonDetail = DarwinNotificationDetails();
+    const notificationDetails = NotificationDetails(
+      iOS: iosNotificatonDetail,
+      android: androidNotificationDetail,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      1,
+      'Hello Kitty',
+      'Too little cat food, please add it in time!',
+      notificationDetails,
     );
   }
 }
