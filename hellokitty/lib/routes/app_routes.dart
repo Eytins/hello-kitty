@@ -4,7 +4,6 @@ import 'package:hellokitty/screens/profile_page.dart';
 import 'package:hellokitty/widgets/linechart.dart';
 
 import '../screens/home_page.dart';
-import '../screens/pet_profile.dart';
 import '../screens/auto_feeding.dart';
 import '../screens/manual_feeding.dart';
 import '../screens/feeding_records.dart';
